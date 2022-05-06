@@ -6,27 +6,28 @@ from random import random
 import pygame as pg
 
 pg.init()
-clock = pg.time.Clock()
-font = pg.font.SysFont("Arial", 18)
-fps = 60
-ratio = 16/9
-width = 1200
-height = int(width/ratio)
-size = (width, height)
+CLOCK = pg.time.Clock()
+FONT = pg.font.SysFont("Arial", 18)
+FPS = 60
+RATIO = 16/9
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = int(SCREEN_WIDTH/RATIO)
+SIZE = (SCREEN_WIDTH, SCREEN_HEIGHT)
 
 
 def update_fps():
-    fps = f'FPS: {int(clock.get_fps())}'
-    fps_text = font.render(fps, True, pg.Color("coral"))
+    fps = f'FPS: {int(CLOCK.get_fps())}'
+    fps_text = FONT.render(fps, True, pg.Color("coral"))
     return fps_text
 
 
 def main():
     black = 0, 0, 0
 
-    screen = pg.display.set_mode(size)
+    screen = pg.display.set_mode(SIZE)
 
-    ants = [Ant(width//2, height//2, speed=120) for _ in range(5000)]
+
+    ants = [Ant(SCREEN_WIDTH//2, SCREEN_HEIGHT//2, speed=120) for _ in range(5000)]
     prev_time = time.perf_counter()
 
     while True:
@@ -35,7 +36,7 @@ def main():
                 pg.quit()
                 exit()
 
-        screen.fill(black)
+        screen.fill(pg.color.Color('white'))
         screen.blit(update_fps(), (10, 0))
 
         dt = time.perf_counter() - prev_time
@@ -44,7 +45,7 @@ def main():
             ant.update(dt)
             ant.draw(screen)
 
-        clock.tick(fps)
+        CLOCK.tick(FPS)
         pg.display.flip()
 
 
@@ -56,7 +57,7 @@ class Ant:
         else:
             self.direction = direction
         self.color = 0, 0, 255
-        self.time = clock.get_time()
+        self.time = CLOCK.get_time()
         self.speed = speed
 
     def draw(self, screen):
@@ -69,14 +70,14 @@ class Ant:
         if self.pos.x < 0:
             self.pos.x = 0
             self.direction = math.pi - self.direction
-        elif self.pos.x > width:
-            self.pos.x = width
+        elif self.pos.x > SCREEN_WIDTH:
+            self.pos.x = SCREEN_WIDTH
             self.direction = math.pi - self.direction
         if self.pos.y < 0:
             self.pos.y = 0
             self.direction = -self.direction
-        elif self.pos.y > height:
-            self.pos.y = height
+        elif self.pos.y > SCREEN_HEIGHT:
+            self.pos.y = SCREEN_HEIGHT
             self.direction = -self.direction
 
     def update(self, dt):
