@@ -1,6 +1,7 @@
 """Simulation for ant colony path finding."""
 import math
 import time
+from enum import Enum
 from random import random
 
 import pygame as pg
@@ -22,7 +23,11 @@ def update_fps():
 
 
 def main():
-    black = 0, 0, 0
+
+    grid_width, grid_height = 50, 50
+    obstacle_grid = np.zeros((grid_width, grid_height), dtype=bool)
+    pheromone_grid = np.zeros((grid_width, grid_height, 2), dtype=np.float)
+
 
     screen = pg.display.set_mode(SIZE)
 
@@ -49,40 +54,69 @@ def main():
         pg.display.flip()
 
 
+class Direction(Enum):
+    Right: int = 0
+    Up: int = 1
+    Left: int = 2
+    Down: int = 3
+
+
 class Ant:
     def __init__(self, x, y, speed, direction=None):
         self.pos = pg.math.Vector2(x, y)
         if direction is None:
-            self.direction = random() * 2 * math.pi
+            self.direction = random.choice(list(Direction))
         else:
             self.direction = direction
-        self.color = 0, 0, 255
-        self.time = CLOCK.get_time()
-        self.speed = speed
 
-    def draw(self, screen):
-        pg.draw.circle(screen, self.color, self.pos, 10)
+    def move(self, obstacle_grid, pheromone_grid):
 
-    def move(self, dt):
-        self.pos.x += math.cos(self.direction) * dt * self.speed
-        self.pos.y += math.sin(self.direction) * dt * self.speed
+        # Choose direction
+        possible_directions = np.array([1, 1, 1, 1])
 
-        if self.pos.x < 0:
-            self.pos.x = 0
-            self.direction = math.pi - self.direction
-        elif self.pos.x > SCREEN_WIDTH:
-            self.pos.x = SCREEN_WIDTH
-            self.direction = math.pi - self.direction
-        if self.pos.y < 0:
-            self.pos.y = 0
-            self.direction = -self.direction
-        elif self.pos.y > SCREEN_HEIGHT:
-            self.pos.y = SCREEN_HEIGHT
-            self.direction = -self.direction
+        # Check if direction is blocked by wall.
+        if self.pos.x == 0:
+            possible_directions[Direction.Left.value] = 0
+        elif self.pos.x == obstacle_grid.shape[1] - 1:
+            possible_directions[Direction.Right.value] = 0
+        if self.pos.y == 0:
+            possible_directions[Direction.Down.value] = 0
+        elif self.pos.y == obstacle_grid.shape[0] - 1:
+            possible_directions[Direction.Up.value] = 0
 
-    def update(self, dt):
-        self.direction += random() * math.pi - math.pi/2
-        self.move(dt)
+        # Check if direction is blocked by obstacle.
+        if obstacle_grid[self.pos.x+1, self.pos.y]:
+            possible_directions[Direction.Right.value] = 0
+        if obstacle_grid[self.pos.x-1, self.pos.y]:
+            possible_directions[Direction.Left.value] = 0
+        if obstacle_grid[self.pos.x, self.pos.y+1]:
+            possible_directions[Direction.Up.value] = 0
+        if obstacle_grid[self.pos.x, self.pos.y-1]:
+            possible_directions[Direction.Down.value] = 0
+
+        # Weigh direction by self.direction.
+        # Todo: Maybe remove?
+        possible_directions[self.direction.value] *= 0.5
+        possible_directions[(self.direction.value + 1) % 4] *= 0.2
+        possible_directions[(self.direction.value - 1) % 4] *= 0.2
+        possible_directions[(self.direction.value + 2) % 4] *= 0.1
+
+        # Weigh direction by pheromone.
+        # Todo: implement
+
+        possible_directions = possible_directions/sum(possible_directions)
+        self.direction = np.random.choice(list(Direction), p=possible_directions)
+
+        # Move
+        if self.direction == Direction.Right:
+            self.pos.x += 1
+        elif self.direction == Direction.Up:
+            self.pos.y += 1
+        elif self.direction == Direction.Left:
+            self.pos.x -= 1
+        elif self.direction == Direction.Down:
+            self.pos.y -= 1
+
 
 
 if __name__ == '__main__':
