@@ -62,29 +62,16 @@ class Ant:
         # Choose direction
         possible_directions = np.array([1, 1, 1, 1])
 
-        # Check if direction is blocked by wall.
-        if self.x == 0:
-            possible_directions[directions.Left] = 0
-        elif self.x == obstacle_grid.shape[1] - 1:
-            possible_directions[directions.Right] = 0
-        if self.y == 0:
-            possible_directions[directions.Down] = 0
-        elif self.y == obstacle_grid.shape[0] - 1:
-            possible_directions[directions.Up] = 0
-
         # Check if direction is blocked by obstacle.
-        if self.x != obstacle_grid.shape[1]-1:
-            if obstacle_grid[self.x+1, self.y]:
-                possible_directions[directions.Right] = 0
-        if self.x != 0:
-            if obstacle_grid[self.x-1, self.y]:
-                possible_directions[directions.Left] = 0
-        if self.y != obstacle_grid.shape[0]-1:
-            if obstacle_grid[self.x, self.y+1]:
-                possible_directions[directions.Up] = 0
-        if self.y != 0:
-            if obstacle_grid[self.x, self.y-1]:
-                possible_directions[directions.Down] = 0
+        height, width = obstacle_grid.shape
+        if obstacle_grid[(self.x+1) % width, self.y]:
+            possible_directions[directions.Right] = 0
+        if obstacle_grid[(self.x-1), self.y]:
+            possible_directions[directions.Left] = 0
+        if obstacle_grid[self.x, (self.y+1) % height]:
+            possible_directions[directions.Up] = 0
+        if obstacle_grid[self.x, self.y-1]:
+            possible_directions[directions.Down] = 0
 
         # Weigh direction by self.direction.
         # Todo: Maybe remove? -> current implementation causes NaN values
@@ -101,13 +88,13 @@ class Ant:
 
         # Move
         if self.direction == directions.Right:
-            self.x += 1
+            self.x = (self.x + 1) % width
         elif self.direction == directions.Up:
-            self.y += 1
+            self.y = (self.y + 1) % height
         elif self.direction == directions.Left:
-            self.x -= 1
+            self.x = (self.x - 1) % width
         elif self.direction == directions.Down:
-            self.y -= 1
+            self.y = (self.y - 1) % height
 
 
 if __name__ == '__main__':
