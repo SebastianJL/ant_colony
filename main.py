@@ -1,5 +1,6 @@
 """Simulation for ant colony path finding."""
 from enum import Enum
+import random
 import numpy as np
 import time
 
@@ -104,7 +105,7 @@ class Ant:
         # Todo: implement
 
         possible_directions = possible_directions/sum(possible_directions)
-        self.direction = np.random.choice(list(Direction), p=possible_directions)
+        self.direction = random.choices(list(Direction), weights=possible_directions)[0]
 
         # Move
         if self.direction == Direction.Right:
