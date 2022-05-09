@@ -1,9 +1,8 @@
 """Simulation for ant colony path finding."""
-from enum import Enum
 import random
 import numpy as np
 import time
-
+import directions
 import pygame as pg
 
 pg.init()
@@ -49,19 +48,12 @@ def main():
         pg.display.flip()
 
 
-class Direction(Enum):
-    Right: int = 0
-    Up: int = 1
-    Left: int = 2
-    Down: int = 3
-
-
 class Ant:
     def __init__(self, x, y, speed, direction=None):
         self.x = x
         self.y = y
         if direction is None:
-            self.direction = np.random.choice(list(Direction))
+            self.direction = np.random.choice(directions.directions)
         else:
             self.direction = direction
 
@@ -72,27 +64,27 @@ class Ant:
 
         # Check if direction is blocked by wall.
         if self.x == 0:
-            possible_directions[Direction.Left.value] = 0
+            possible_directions[directions.Left] = 0
         elif self.x == obstacle_grid.shape[1] - 1:
-            possible_directions[Direction.Right.value] = 0
+            possible_directions[directions.Right] = 0
         if self.y == 0:
-            possible_directions[Direction.Down.value] = 0
+            possible_directions[directions.Down] = 0
         elif self.y == obstacle_grid.shape[0] - 1:
-            possible_directions[Direction.Up.value] = 0
+            possible_directions[directions.Up] = 0
 
         # Check if direction is blocked by obstacle.
         if self.x != obstacle_grid.shape[1]-1:
             if obstacle_grid[self.x+1, self.y]:
-                possible_directions[Direction.Right.value] = 0
+                possible_directions[directions.Right] = 0
         if self.x != 0:
             if obstacle_grid[self.x-1, self.y]:
-                possible_directions[Direction.Left.value] = 0
+                possible_directions[directions.Left] = 0
         if self.y != obstacle_grid.shape[0]-1:
             if obstacle_grid[self.x, self.y+1]:
-                possible_directions[Direction.Up.value] = 0
+                possible_directions[directions.Up] = 0
         if self.y != 0:
             if obstacle_grid[self.x, self.y-1]:
-                possible_directions[Direction.Down.value] = 0
+                possible_directions[directions.Down] = 0
 
         # Weigh direction by self.direction.
         # Todo: Maybe remove? -> current implementation causes NaN values
@@ -105,16 +97,16 @@ class Ant:
         # Todo: implement
 
         possible_directions = possible_directions/sum(possible_directions)
-        self.direction = random.choices(list(Direction), weights=possible_directions)[0]
+        self.direction = random.choices(directions.directions, weights=possible_directions)[0]
 
         # Move
-        if self.direction == Direction.Right:
+        if self.direction == directions.Right:
             self.x += 1
-        elif self.direction == Direction.Up:
+        elif self.direction == directions.Up:
             self.y += 1
-        elif self.direction == Direction.Left:
+        elif self.direction == directions.Left:
             self.x -= 1
-        elif self.direction == Direction.Down:
+        elif self.direction == directions.Down:
             self.y -= 1
 
 
