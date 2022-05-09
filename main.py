@@ -19,9 +19,11 @@ def update_fps():
 
 def main():
 
-    grid_width, grid_height = 100, 100
-    screensize_multiplier = 4
+    grid_width, grid_height = 50, 50
+    screensize_multiplier = 8
     obstacle_grid = np.zeros((grid_width, grid_height), dtype=bool)
+    obstacle_grid[0, :] = True
+    obstacle_grid[:, 0] = True
     pheromone_grid = np.zeros((grid_width, grid_height, 2), dtype=float)
 
     screen = pg.display.set_mode((grid_width * screensize_multiplier, grid_height * screensize_multiplier))
