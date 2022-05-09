@@ -1,7 +1,9 @@
 """Simulation for ant colony path finding."""
 import random
 import numpy as np
-import time
+
+from PIL import Image
+
 import directions
 import pygame as pg
 
@@ -9,6 +11,8 @@ pg.init()
 CLOCK = pg.time.Clock()
 FONT = pg.font.SysFont("Arial", 18)
 FPS = 60
+RED, GREEN, BLUE = (255, 0, 0), (0, 255, 0), (0, 0, 255)
+WHITE, BLACK = (255, 255, 255), (0, 0, 0)
 
 
 def update_fps():
@@ -17,23 +21,38 @@ def update_fps():
     return fps_text
 
 
+def load_map(filename) -> (np.ndarray, np.ndarray, np.ndarray):
+    """Load map from image.
+
+    The image is interpreted as a luminance image with any value smaller than 255
+    interpreted as an obstacle.
+    """
+
+    with Image.open(filename) as img:
+        img = img.convert('L')
+        img_np = np.array(img)
+
+    obstacles = img_np < 255
+    return obstacles
+
+
 def main():
+    # Load map
+    obstacle_grid = load_map('map.png')
+    pheromone_grid = np.zeros_like(obstacle_grid)
+    grid_height, grid_width = obstacle_grid.shape
 
-    grid_width, grid_height = 50, 50
-    screensize_multiplier = 8
-    obstacle_grid = np.zeros((grid_width, grid_height), dtype=bool)
-    obstacle_grid[0, :] = True
-    obstacle_grid[:, 0] = True
-    pheromone_grid = np.zeros((grid_width, grid_height, 2), dtype=float)
-
+    # Create screen
     info_object = pg.display.Info()
     SCREEN_WIDTH, SCREEN_HEIGHT = info_object.current_w//2, info_object.current_h//2
     screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
+    # Create rectangles representing the screen and the grid.
     screen_rect = screen.get_rect()
     grid_rect = pg.rect.Rect(0, 0, grid_width, grid_height).fit(screen_rect)
 
-    ants = [Ant(grid_width//2, grid_height//2, speed=120) for _ in range(1000)]
+    # Create ants
+    ants = [Ant(grid_width//2, grid_height//2) for _ in range(1000)]
 
     while True:
         for event in pg.event.get():
@@ -44,13 +63,13 @@ def main():
         for ant in ants:
             ant.move(obstacle_grid, pheromone_grid)
 
-        draw_scene(screen, grid_rect, ants, obstacle_grid, pheromone_grid)
+        draw_scene(screen, grid_rect, ants, obstacle_grid)
 
         CLOCK.tick(FPS)
         pg.display.flip()
 
 
-def draw_scene(screen, grid_rect, ants, obstacle_grid, pheromone_grid):
+def draw_scene(screen, grid_rect, ants, obstacle_grid):
     """Draw ants, obstacles and pheromones."""
     grid_width, grid_height = obstacle_grid.shape
     block_size = grid_rect.width//grid_width
@@ -65,16 +84,22 @@ def draw_scene(screen, grid_rect, ants, obstacle_grid, pheromone_grid):
         ant_rect = pg.Rect(
             left + ant.y*block_size, top + ant.x*block_size,
             block_size, block_size)
-        pg.draw.rect(screen, (0, 0, 255), ant_rect)
+        pg.draw.rect(screen, BLUE, ant_rect)
 
-    # TODO: Draw obstacles
+    for (x, y) in np.argwhere(obstacle_grid):
+        obstacle_rect = pg.Rect(
+            left + y*block_size, top + x*block_size,
+            block_size, block_size)
+        pg.draw.rect(screen, BLACK, obstacle_rect)
+
     # TODO: draw pheromones
+    # TODO: Draw food.
 
     screen.blit(update_fps(), (10, 0))
 
 
 class Ant:
-    def __init__(self, x, y, speed, direction=None):
+    def __init__(self, x, y, direction=None):
         self.x = x
         self.y = y
         if direction is None:
