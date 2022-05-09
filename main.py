@@ -1,8 +1,5 @@
 """Simulation for ant colony path finding."""
-import math
-import time
 from enum import Enum
-from random import random
 import numpy as np
 import time
 
