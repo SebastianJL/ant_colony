@@ -26,7 +26,7 @@ def main():
 
     screen = pg.display.set_mode((grid_width * screensize_multiplier, grid_height * screensize_multiplier))
 
-    ants = [Ant(grid_width//2, grid_height//2, speed=120) for _ in range(5000)]
+    ants = [Ant(grid_width//2, grid_height//2, speed=120) for _ in range(1000)]
     prev_time = time.perf_counter()
 
     while True:
@@ -38,12 +38,10 @@ def main():
         screen.fill(pg.color.Color('black'))
         screen.blit(update_fps(), (10, 0))
 
-        dt = time.perf_counter() - prev_time
-        prev_time = time.perf_counter()
         for ant in ants:
             ant.move(obstacle_grid, pheromone_grid)
-            pg.draw.rect(screen, (0, 0, 255), pg.Rect(ant.pos.x*screensize_multiplier,
-                                                      ant.pos.y*screensize_multiplier,
+            pg.draw.rect(screen, (0, 0, 255), pg.Rect(ant.x*screensize_multiplier,
+                                                      ant.y*screensize_multiplier,
                                                       screensize_multiplier,
                                                       screensize_multiplier))
         CLOCK.tick(FPS)
@@ -59,7 +57,8 @@ class Direction(Enum):
 
 class Ant:
     def __init__(self, x, y, speed, direction=None):
-        self.pos = pg.math.Vector2(x, y)
+        self.x = x
+        self.y = y
         if direction is None:
             self.direction = np.random.choice(list(Direction))
         else:
@@ -71,27 +70,27 @@ class Ant:
         possible_directions = np.array([1, 1, 1, 1])
 
         # Check if direction is blocked by wall.
-        if self.pos.x == 0:
+        if self.x == 0:
             possible_directions[Direction.Left.value] = 0
-        elif self.pos.x == obstacle_grid.shape[1] - 1:
+        elif self.x == obstacle_grid.shape[1] - 1:
             possible_directions[Direction.Right.value] = 0
-        if self.pos.y == 0:
+        if self.y == 0:
             possible_directions[Direction.Down.value] = 0
-        elif self.pos.y == obstacle_grid.shape[0] - 1:
+        elif self.y == obstacle_grid.shape[0] - 1:
             possible_directions[Direction.Up.value] = 0
 
         # Check if direction is blocked by obstacle.
-        if self.pos.x != obstacle_grid.shape[1]-1:
-            if obstacle_grid[int(self.pos.x)+1, int(self.pos.y)]:
+        if self.x != obstacle_grid.shape[1]-1:
+            if obstacle_grid[self.x+1, self.y]:
                 possible_directions[Direction.Right.value] = 0
-        if self.pos.x != 0:
-            if obstacle_grid[int(self.pos.x)-1, int(self.pos.y)]:
+        if self.x != 0:
+            if obstacle_grid[self.x-1, self.y]:
                 possible_directions[Direction.Left.value] = 0
-        if self.pos.y != obstacle_grid.shape[0]-1:
-            if obstacle_grid[int(self.pos.x), int(self.pos.y)+1]:
+        if self.y != obstacle_grid.shape[0]-1:
+            if obstacle_grid[self.x, self.y+1]:
                 possible_directions[Direction.Up.value] = 0
-        if self.pos.y != 0:
-            if obstacle_grid[int(self.pos.x), int(self.pos.y)-1]:
+        if self.y != 0:
+            if obstacle_grid[self.x, self.y-1]:
                 possible_directions[Direction.Down.value] = 0
 
         # Weigh direction by self.direction.
@@ -109,13 +108,13 @@ class Ant:
 
         # Move
         if self.direction == Direction.Right:
-            self.pos.x += 1
+            self.x += 1
         elif self.direction == Direction.Up:
-            self.pos.y += 1
+            self.y += 1
         elif self.direction == Direction.Left:
-            self.pos.x -= 1
+            self.x -= 1
         elif self.direction == Direction.Down:
-            self.pos.y -= 1
+            self.y -= 1
 
 
 if __name__ == '__main__':
