@@ -110,7 +110,7 @@ class Ant:
     def move(self, obstacle_grid, pheromone_grid):
 
         # Choose direction
-        possible_directions = np.array([1, 1, 1, 1])
+        possible_directions = np.array([1, 1, 1, 1], dtype=float)
 
         # Check if direction is blocked by obstacle.
         height, width = obstacle_grid.shape
@@ -123,12 +123,11 @@ class Ant:
         if obstacle_grid[self.x, self.y - 1]:
             possible_directions[directions.Down] = 0
 
-        # Weigh direction by self.direction.
-        # Todo: Maybe remove? -> current implementation causes NaN values
-        # possible_directions[self.direction.value] *= 0.5
-        # possible_directions[(self.direction.value + 1) % 4] *= 0.2
-        # possible_directions[(self.direction.value - 1) % 4] *= 0.2
-        # possible_directions[(self.direction.value + 2) % 4] *= 0.1
+        # Prefer current direction.
+        possible_directions[self.direction] *= 3
+        possible_directions[(self.direction + 1) % 4] *= 0.4
+        possible_directions[(self.direction - 1) % 4] *= 0.4
+        possible_directions[(self.direction + 2) % 4] *= 0.1
 
         # Weigh direction by pheromone.
         # Todo: implement
