@@ -20,7 +20,7 @@ WHITE, BLACK = (255, 255, 255), (0, 0, 0)
 
 def update_fps():
     fps = f'FPS: {int(CLOCK.get_fps())}'
-    fps_text = FONT.render(fps, True, pg.Color("coral"))
+    fps_text = FONT.render(fps, True, pg.Color("black"))
     return fps_text
 
 
@@ -117,7 +117,7 @@ def draw_scene(screen, grid_rect, block_size, ants, obstacle_grid, pheromone_gri
 
     # TODO: Draw food.
 
-    screen.blit(update_fps(), (10, 0))
+    screen.blit(update_fps(), (10, 10))
 
 
 class Ant:
