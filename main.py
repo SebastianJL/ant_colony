@@ -227,6 +227,17 @@ class Ant:
         elif self.direction == directions.Down:
             self.y = (self.y - 1)%height
 
+    def switch_state_food(self):
+        to_food = 0
+        to_hive = 1
+        if self.state == to_food:
+            self.state = to_hive
+
+    def switch_state_hive(self):
+        to_food = 0
+        to_hive = 1
+        if self.state == to_hive:
+            self.state = to_food
 
 if __name__ == '__main__':
     main()
