@@ -71,7 +71,11 @@ def main():
     grid_rect = pg.rect.Rect(0, 0, grid_width, grid_height).fit(screen_rect)
 
     # Create ants
-    ants = [Ant(grid_width//2, grid_height//2) for _ in range(1000)]
+    ants = [Ant(grid_width//2, grid_height//2) for _ in range(500)]
+
+    # Ant states
+    to_food = 0
+    to_hive = 1
 
     while True:
         for event in pg.event.get():
@@ -80,13 +84,25 @@ def main():
                 exit()
 
         for ant in ants:
-            pheromone_grid[ant.y, ant.x] += 1
-            ant.move(obstacle_grid)
+            if food_grid[ant.y, ant.x] == 1:
+                ant.switch_state_food()
+            if hive_grid[ant.y, ant.x] == 1:
+                ant.switch_state_hive()
+            if ant.state == to_food:
+                pheromone_grid_food[ant.y, ant.x] += 1
+            else:
+                pheromone_grid_hive[ant.y, ant.x] += 1
 
-        draw_scene(screen, grid_rect, block_size, ants, obstacle_grid, pheromone_grid)
+            ant.move(obstacle_grid, pheromone_grid_food, pheromone_grid_hive)
 
-        pheromone_grid *= 0.9
-        pheromone_grid[pheromone_grid < 0.01] = 0
+        draw_scene(screen, grid_rect, block_size, ants, obstacle_grid, pheromone_grid_food, pheromone_grid_hive,
+                   food_grid, hive_grid)
+
+        pheromone_grid_food *= 0.9
+        pheromone_grid_food[pheromone_grid_food < 0.01] = 0
+
+        pheromone_grid_hive *= 0.9
+        pheromone_grid_hive[pheromone_grid_hive < 0.01] = 0
         # pheromone_grid = pheromone_grid.clip(0, None)
 
         CLOCK.tick(FPS)
