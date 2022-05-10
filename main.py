@@ -8,8 +8,11 @@ import directions
 import pygame as pg
 
 pg.init()
+pg.display.set_caption("Ant Simulation")
+pygame_icon = pg.image.load("ant.png")
+pg.display.set_icon(pygame_icon)
 CLOCK = pg.time.Clock()
-FONT = pg.font.SysFont("Arial", 18)
+FONT = pg.font.SysFont("Arial", 16)
 FPS = 60
 RED, GREEN, BLUE = (255, 0, 0), (0, 255, 0), (0, 0, 255)
 WHITE, BLACK = (255, 255, 255), (0, 0, 0)
@@ -38,14 +41,22 @@ def load_map(filename) -> (np.ndarray, np.ndarray, np.ndarray):
 
 def main():
     # Load map
-    obstacle_grid = load_map('map.png')
+    obstacle_grid = load_map('maps/map2.png')
     pheromone_grid = np.zeros_like(obstacle_grid)
     grid_height, grid_width = obstacle_grid.shape
+    grid_ratio = grid_height / grid_width
 
     # Create screen
     info_object = pg.display.Info()
     SCREEN_WIDTH, SCREEN_HEIGHT = info_object.current_w//2, info_object.current_h//2
-    screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    screen_ratio = SCREEN_HEIGHT / SCREEN_WIDTH
+
+    if grid_ratio > screen_ratio:
+        block_size = SCREEN_HEIGHT // grid_height
+    else:
+        block_size = SCREEN_WIDTH // grid_width
+
+    screen = pg.display.set_mode((grid_width * block_size, grid_height * block_size))
 
     # Create rectangles representing the screen and the grid.
     screen_rect = screen.get_rect()
@@ -63,16 +74,15 @@ def main():
         for ant in ants:
             ant.move(obstacle_grid, pheromone_grid)
 
-        draw_scene(screen, grid_rect, ants, obstacle_grid)
+        draw_scene(screen, grid_rect, ants, obstacle_grid, block_size)
 
         CLOCK.tick(FPS)
         pg.display.flip()
 
 
-def draw_scene(screen, grid_rect, ants, obstacle_grid):
+def draw_scene(screen, grid_rect, ants, obstacle_grid, block_size):
     """Draw ants, obstacles and pheromones."""
     grid_width, grid_height = obstacle_grid.shape
-    block_size = grid_rect.width//grid_width
     top, left = grid_rect.top, grid_rect.left
 
     # Draw background and grid background.
@@ -82,7 +92,7 @@ def draw_scene(screen, grid_rect, ants, obstacle_grid):
     # Draw ants.
     for ant in ants:
         ant_rect = pg.Rect(
-            left + ant.y*block_size, top + ant.x*block_size,
+            left + ant.x*block_size, top + ant.y*block_size,
             block_size, block_size)
         pg.draw.rect(screen, BLUE, ant_rect)
 
@@ -90,7 +100,7 @@ def draw_scene(screen, grid_rect, ants, obstacle_grid):
         obstacle_rect = pg.Rect(
             left + y*block_size, top + x*block_size,
             block_size, block_size)
-        pg.draw.rect(screen, BLACK, obstacle_rect)
+        pg.draw.rect(screen, GREEN, obstacle_rect)
 
     # TODO: draw pheromones
     # TODO: Draw food.
