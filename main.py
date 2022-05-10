@@ -166,14 +166,17 @@ def draw_scene(screen, grid_rect, block_size, ants, obstacle_grid, pheromone_gri
 
 class Ant:
     def __init__(self, x, y, direction=None):
+        to_food = 0
+        to_hive = 1
         self.x = x
         self.y = y
+        self.state = to_food
         if direction is None:
             self.direction = np.random.choice(directions.directions)
         else:
             self.direction = direction
 
-    def move(self, obstacle_grid):
+    def move(self, obstacle_grid, pheromone_grid_food, pheromone_grid_hive):
 
         # Choose direction
         possible_directions = np.array([1, 1, 1, 1], dtype=float)
@@ -196,7 +199,20 @@ class Ant:
         possible_directions[(self.direction + 2) % 4] *= 0.1
 
         # Weigh direction by pheromone.
-        # Todo: implement
+        to_food = 0
+        to_hive = 1
+        if self.state == to_food:
+            possible_directions[directions.Right] *= 1 + pheromone_grid_food[self.y, (self.x + 1)%width]
+            possible_directions[directions.Left] *= 1 + pheromone_grid_food[self.y, (self.x - 1)]
+            possible_directions[directions.Up] *= 1 + pheromone_grid_food[(self.y + 1)%height, self.x]
+            possible_directions[directions.Down] *= 1 + pheromone_grid_food[self.y - 1, self.x]
+
+        if self.state == to_hive:
+            possible_directions[directions.Right] *= 1 + pheromone_grid_hive[self.y, (self.x + 1)%width]
+            possible_directions[directions.Left] *= 1 + pheromone_grid_hive[self.y, (self.x - 1)]
+            possible_directions[directions.Up] *= 1 + pheromone_grid_hive[(self.y + 1)%height, self.x]
+            possible_directions[directions.Down] *= 1 + pheromone_grid_hive[self.y - 1, self.x]
+
 
         possible_directions = possible_directions/sum(possible_directions)
         self.direction = random.choices(directions.directions, weights=possible_directions)[0]
