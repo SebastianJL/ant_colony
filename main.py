@@ -114,13 +114,13 @@ class Ant:
 
         # Check if direction is blocked by obstacle.
         height, width = obstacle_grid.shape
-        if obstacle_grid[(self.x + 1)%width, self.y]:
+        if obstacle_grid[self.y, (self.x + 1)%width]:
             possible_directions[directions.Right] = 0
-        if obstacle_grid[(self.x - 1), self.y]:
+        if obstacle_grid[self.y, (self.x - 1)]:
             possible_directions[directions.Left] = 0
-        if obstacle_grid[self.x, (self.y + 1)%height]:
+        if obstacle_grid[(self.y + 1)%height, self.x]:
             possible_directions[directions.Up] = 0
-        if obstacle_grid[self.x, self.y - 1]:
+        if obstacle_grid[self.y - 1, self.x]:
             possible_directions[directions.Down] = 0
 
         # Weigh direction by self.direction.
