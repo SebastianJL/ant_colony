@@ -43,9 +43,16 @@ def load_map(filename) -> (np.ndarray, np.ndarray, np.ndarray):
 def main():
     # Load map
     obstacle_grid = load_map('maps/map2.png')
-    pheromone_grid = np.zeros_like(obstacle_grid, dtype=float)
+    pheromone_grid_food = np.zeros_like(obstacle_grid, dtype=float)
+    pheromone_grid_hive = np.zeros_like(obstacle_grid, dtype=float)
     grid_height, grid_width = obstacle_grid.shape
     grid_ratio = grid_height / grid_width
+
+    # Manually set food source and hive
+    food_grid = np.zeros_like(obstacle_grid)
+    hive_grid = np.zeros_like(obstacle_grid)
+    food_grid[50, 100] = 1
+    hive_grid[grid_height//2, grid_width//2] = 1
 
     # Create screen
     info_object = pg.display.Info()
