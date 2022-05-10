@@ -109,7 +109,8 @@ def main():
         pg.display.flip()
 
 
-def draw_scene(screen, grid_rect, block_size, ants, obstacle_grid, pheromone_grid):
+def draw_scene(screen, grid_rect, block_size, ants, obstacle_grid, pheromone_grid_food, pheromone_grid_hive,
+               food_grid, hive_grid):
     """Draw ants, obstacles and pheromones."""
     grid_width, grid_height = obstacle_grid.shape
     top, left = grid_rect.top, grid_rect.left
@@ -118,12 +119,19 @@ def draw_scene(screen, grid_rect, block_size, ants, obstacle_grid, pheromone_gri
     screen.fill(pg.color.Color('black'))
     pg.draw.rect(screen, (130, 130, 130), grid_rect)
 
-    # Draw pheromones.
-    for (y, x) in np.argwhere(pheromone_grid):
+    # Draw food pheromones.
+    for (y, x) in np.argwhere(pheromone_grid_food):
         pheromone_rect = pg.Rect(
             left + x*block_size, top + y*block_size,
             block_size, block_size)
         pg.draw.rect(screen, GREEN, pheromone_rect)
+
+    # Draw hive pheromones.
+    for (y, x) in np.argwhere(pheromone_grid_hive):
+        pheromone_rect = pg.Rect(
+            left + x * block_size, top + y * block_size,
+            block_size, block_size)
+        pg.draw.rect(screen, RED, pheromone_rect)
 
     # Draw ants.
     for ant in ants:
