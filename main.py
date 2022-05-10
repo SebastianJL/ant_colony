@@ -39,7 +39,7 @@ def load_map(filename) -> (np.ndarray, np.ndarray, np.ndarray):
 def main():
     # Load map
     obstacle_grid = load_map('map.png')
-    pheromone_grid = np.zeros_like(obstacle_grid)
+    pheromone_grid = np.zeros_like(obstacle_grid, dtype=float)
     grid_height, grid_width = obstacle_grid.shape
 
     # Create screen
@@ -61,15 +61,20 @@ def main():
                 exit()
 
         for ant in ants:
-            ant.move(obstacle_grid, pheromone_grid)
+            pheromone_grid[ant.x, ant.y] += 1
+            ant.move(obstacle_grid)
 
-        draw_scene(screen, grid_rect, ants, obstacle_grid)
+        draw_scene(screen, grid_rect, ants, obstacle_grid, pheromone_grid)
+
+        pheromone_grid *= 0.9
+        pheromone_grid[pheromone_grid < 0.01] = 0
+        # pheromone_grid = pheromone_grid.clip(0, None)
 
         CLOCK.tick(FPS)
         pg.display.flip()
 
 
-def draw_scene(screen, grid_rect, ants, obstacle_grid):
+def draw_scene(screen, grid_rect, ants, obstacle_grid, pheromone_grid):
     """Draw ants, obstacles and pheromones."""
     grid_width, grid_height = obstacle_grid.shape
     block_size = grid_rect.width//grid_width
@@ -79,6 +84,13 @@ def draw_scene(screen, grid_rect, ants, obstacle_grid):
     screen.fill(pg.color.Color('black'))
     pg.draw.rect(screen, (130, 130, 130), grid_rect)
 
+    # Draw pheromones.
+    for (x, y) in np.argwhere(pheromone_grid):
+        pheromone_rect = pg.Rect(
+            left + y*block_size, top + x*block_size,
+            block_size, block_size)
+        pg.draw.rect(screen, GREEN, pheromone_rect)
+
     # Draw ants.
     for ant in ants:
         ant_rect = pg.Rect(
@@ -86,13 +98,13 @@ def draw_scene(screen, grid_rect, ants, obstacle_grid):
             block_size, block_size)
         pg.draw.rect(screen, BLUE, ant_rect)
 
+    # Draw obstacles.
     for (x, y) in np.argwhere(obstacle_grid):
         obstacle_rect = pg.Rect(
             left + y*block_size, top + x*block_size,
             block_size, block_size)
         pg.draw.rect(screen, BLACK, obstacle_rect)
 
-    # TODO: draw pheromones
     # TODO: Draw food.
 
     screen.blit(update_fps(), (10, 0))
@@ -107,7 +119,7 @@ class Ant:
         else:
             self.direction = direction
 
-    def move(self, obstacle_grid, pheromone_grid):
+    def move(self, obstacle_grid):
 
         # Choose direction
         possible_directions = np.array([1, 1, 1, 1], dtype=float)
