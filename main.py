@@ -147,7 +147,19 @@ def draw_scene(screen, grid_rect, block_size, ants, obstacle_grid, pheromone_gri
             block_size, block_size)
         pg.draw.rect(screen, BLACK, obstacle_rect)
 
-    # TODO: Draw food.
+    # Draw food.
+    for (y, x) in np.argwhere(food_grid):
+        obstacle_rect = pg.Rect(
+            left + x*block_size, top + y*block_size,
+            block_size, block_size)
+        pg.draw.rect(screen, YELLOW, obstacle_rect)
+
+    # Draw hive.
+    for (y, x) in np.argwhere(hive_grid):
+        obstacle_rect = pg.Rect(
+            left + x * block_size, top + y * block_size,
+            block_size, block_size)
+        pg.draw.rect(screen, PURPLE, obstacle_rect)
 
     screen.blit(update_fps(), (10, 0))
 
