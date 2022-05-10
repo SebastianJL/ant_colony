@@ -16,6 +16,7 @@ FONT = pg.font.SysFont("Arial", 16)
 FPS = 60
 RED, GREEN, BLUE = (255, 0, 0), (0, 255, 0), (0, 0, 255)
 WHITE, BLACK = (255, 255, 255), (0, 0, 0)
+YELLOW, PURPLE = (255, 255, 0), (255, 0, 255)
 
 
 def update_fps():
