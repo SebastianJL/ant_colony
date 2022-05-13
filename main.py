@@ -21,7 +21,7 @@ YELLOW, PURPLE = (255, 255, 0), (255, 0, 255)
 
 def update_fps():
     fps = f'FPS: {int(CLOCK.get_fps())}'
-    fps_text = FONT.render(fps, True, pg.Color("coral"))
+    fps_text = FONT.render(fps, True, pg.Color("black"))
     return fps_text
 
 
@@ -161,7 +161,7 @@ def draw_scene(screen, grid_rect, block_size, ants, obstacle_grid, pheromone_gri
             block_size, block_size)
         pg.draw.rect(screen, PURPLE, obstacle_rect)
 
-    screen.blit(update_fps(), (10, 0))
+    screen.blit(update_fps(), (10, 10))
 
 
 class Ant:
