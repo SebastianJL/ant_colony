@@ -13,7 +13,7 @@ pygame_icon = pg.image.load("ant.png")
 pg.display.set_icon(pygame_icon)
 CLOCK = pg.time.Clock()
 FONT = pg.font.SysFont("Arial", 16)
-FPS = 60
+FPS = 10
 RED, GREEN, BLUE = (255, 0, 0), (0, 255, 0), (0, 0, 255)
 WHITE, BLACK = (255, 255, 255), (0, 0, 0)
 YELLOW, PURPLE = (255, 255, 0), (255, 0, 255)
@@ -42,7 +42,7 @@ def load_map(filename) -> (np.ndarray, np.ndarray, np.ndarray):
 
 def main():
     # Load map
-    obstacle_grid = load_map('maps/map2.png')
+    obstacle_grid = load_map('maps/map3.png')
     pheromone_grid_food = np.zeros_like(obstacle_grid, dtype=float)
     pheromone_grid_hive = np.zeros_like(obstacle_grid, dtype=float)
     grid_height, grid_width = obstacle_grid.shape
@@ -51,8 +51,8 @@ def main():
     # Manually set food source and hive
     food_grid = np.zeros_like(obstacle_grid)
     hive_grid = np.zeros_like(obstacle_grid)
-    food_grid[50, 100] = 1
-    hive_grid[grid_height//2, grid_width//2] = 1
+    food_grid[1, 1] = 1
+    hive_grid[18, 18] = 1
 
     # Create screen
     info_object = pg.display.Info()
@@ -71,7 +71,7 @@ def main():
     grid_rect = pg.rect.Rect(0, 0, grid_width, grid_height).fit(screen_rect)
 
     # Create ants
-    ants = [Ant(grid_width//2, grid_height//2) for _ in range(500)]
+    ants = [Ant(18, 18) for _ in range(50)]
 
     while True:
         for event in pg.event.get():
@@ -94,10 +94,10 @@ def main():
         draw_scene(screen, grid_rect, block_size, ants, obstacle_grid, pheromone_grid_food, pheromone_grid_hive,
                    food_grid, hive_grid)
 
-        pheromone_grid_food *= 0.9
+        pheromone_grid_food *= 0.98
         pheromone_grid_food[pheromone_grid_food < 0.01] = 0
 
-        pheromone_grid_hive *= 0.9
+        pheromone_grid_hive *= 0.98
         pheromone_grid_hive[pheromone_grid_hive < 0.01] = 0
         # pheromone_grid = pheromone_grid.clip(0, None)
 
@@ -190,9 +190,9 @@ class Ant:
             possible_directions[directions.Down] = 0
 
         # Prefer current direction.
-        possible_directions[self.direction] *= 3
-        possible_directions[(self.direction + 1) % 4] *= 0.4
-        possible_directions[(self.direction - 1) % 4] *= 0.4
+        possible_directions[self.direction] *= 1
+        possible_directions[(self.direction + 1) % 4] *= 1
+        possible_directions[(self.direction - 1) % 4] *= 1
         possible_directions[(self.direction + 2) % 4] *= 0.1
 
         # Weigh direction by pheromone.
