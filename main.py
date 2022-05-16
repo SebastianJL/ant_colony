@@ -201,13 +201,13 @@ class Ant:
             possible_directions[directions.Left] *= 1 + pheromone_grid_food[self.y, (self.x - 1)]
             possible_directions[directions.Up] *= 1 + pheromone_grid_food[(self.y + 1)%height, self.x]
             possible_directions[directions.Down] *= 1 + pheromone_grid_food[self.y - 1, self.x]
-
-        if self.state == self.TO_HIVE:
+        elif self.state == self.TO_HIVE:
             possible_directions[directions.Right] *= 1 + pheromone_grid_hive[self.y, (self.x + 1)%width]
             possible_directions[directions.Left] *= 1 + pheromone_grid_hive[self.y, (self.x - 1)]
             possible_directions[directions.Up] *= 1 + pheromone_grid_hive[(self.y + 1)%height, self.x]
             possible_directions[directions.Down] *= 1 + pheromone_grid_hive[self.y - 1, self.x]
-
+        else:
+            raise Exception("Unknown state")
 
         possible_directions = possible_directions/sum(possible_directions)
         self.direction = random.choices(directions.directions, weights=possible_directions)[0]
@@ -227,6 +227,7 @@ class Ant:
 
     def seek_food(self):
         self.state = self.TO_FOOD
+
 
 if __name__ == '__main__':
     main()
