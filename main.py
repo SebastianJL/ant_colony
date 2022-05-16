@@ -42,7 +42,7 @@ def load_map(filename) -> (np.ndarray, np.ndarray, np.ndarray):
 
 def main():
     # Load map
-    obstacle_grid = load_map('maps/map3.png')
+    obstacle_grid = load_map('maps/map4.png')
     pheromone_grid_food = np.zeros_like(obstacle_grid, dtype=float)
     pheromone_grid_hive = np.zeros_like(obstacle_grid, dtype=float)
     grid_height, grid_width = obstacle_grid.shape
@@ -82,14 +82,18 @@ def main():
         for ant in ants:
             if food_grid[ant.y, ant.x] == 1:
                 ant.seek_hive()
+                ant.COUNTER = 1
             if hive_grid[ant.y, ant.x] == 1:
                 ant.seek_food()
-            if ant.state == Ant.TO_FOOD:
-                pheromone_grid_food[ant.y, ant.x] += 1
+                ant.COUNTER = 1
+            if ant.state == Ant.TO_HIVE:
+                pheromone_grid_food[ant.y, ant.x] += 1/ant.COUNTER
             else:
-                pheromone_grid_hive[ant.y, ant.x] += 1
+                pheromone_grid_hive[ant.y, ant.x] += 1/ant.COUNTER
 
             ant.move(obstacle_grid, pheromone_grid_food, pheromone_grid_hive)
+
+            ant.COUNTER += 1
 
         draw_scene(screen, grid_rect, block_size, ants, obstacle_grid, pheromone_grid_food, pheromone_grid_hive,
                    food_grid, hive_grid)
@@ -164,6 +168,8 @@ class Ant:
     TO_FOOD = 0
     TO_HIVE = 1
 
+    COUNTER = 1
+
     def __init__(self, x, y, direction=None):
         self.x = x
         self.y = y
@@ -190,22 +196,22 @@ class Ant:
             possible_directions[directions.Down] = 0
 
         # Prefer current direction.
-        possible_directions[self.direction] *= 1
+        possible_directions[self.direction] *= 3
         possible_directions[(self.direction + 1) % 4] *= 1
         possible_directions[(self.direction - 1) % 4] *= 1
         possible_directions[(self.direction + 2) % 4] *= 0.1
 
         # Weigh direction by pheromone.
         if self.state == self.TO_FOOD:
-            possible_directions[directions.Right] *= 1 + pheromone_grid_food[self.y, (self.x + 1)%width]
-            possible_directions[directions.Left] *= 1 + pheromone_grid_food[self.y, (self.x - 1)]
-            possible_directions[directions.Up] *= 1 + pheromone_grid_food[(self.y + 1)%height, self.x]
-            possible_directions[directions.Down] *= 1 + pheromone_grid_food[self.y - 1, self.x]
+            possible_directions[directions.Right] *= 1 + np.exp(pheromone_grid_food[self.y, (self.x + 1)%width])
+            possible_directions[directions.Left] *= 1 + np.exp(pheromone_grid_food[self.y, (self.x - 1)])
+            possible_directions[directions.Up] *= 1 + np.exp(pheromone_grid_food[(self.y + 1)%height, self.x])
+            possible_directions[directions.Down] *= 1 + np.exp(pheromone_grid_food[self.y - 1, self.x])
         elif self.state == self.TO_HIVE:
-            possible_directions[directions.Right] *= 1 + pheromone_grid_hive[self.y, (self.x + 1)%width]
-            possible_directions[directions.Left] *= 1 + pheromone_grid_hive[self.y, (self.x - 1)]
-            possible_directions[directions.Up] *= 1 + pheromone_grid_hive[(self.y + 1)%height, self.x]
-            possible_directions[directions.Down] *= 1 + pheromone_grid_hive[self.y - 1, self.x]
+            possible_directions[directions.Right] *= 1 + np.exp(pheromone_grid_hive[self.y, (self.x + 1)%width])
+            possible_directions[directions.Left] *= 1 + np.exp(pheromone_grid_hive[self.y, (self.x - 1)])
+            possible_directions[directions.Up] *= 1 + np.exp(pheromone_grid_hive[(self.y + 1)%height, self.x])
+            possible_directions[directions.Down] *= 1 + np.exp(pheromone_grid_hive[self.y - 1, self.x])
         else:
             raise Exception("Unknown state")
 
