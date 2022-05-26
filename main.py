@@ -71,39 +71,46 @@ def main():
     grid_rect = pg.rect.Rect(0, 0, grid_width, grid_height).fit(screen_rect)
 
     # Create ants
-    ants = [Ant(18, 18) for _ in range(50)]
+    ants = [Ant(18, 18) for _ in range(3)]
+
+    running = True
 
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
                 exit()
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_SPACE:
+                    running = not running
 
-        for ant in ants:
-            if food_grid[ant.y, ant.x] == 1:
-                ant.seek_hive()
-                ant.COUNTER = 1
-            if hive_grid[ant.y, ant.x] == 1:
-                ant.seek_food()
-                ant.COUNTER = 1
-            if ant.state == Ant.TO_HIVE:
-                pheromone_grid_food[ant.y, ant.x] += 1/ant.COUNTER
-            else:
-                pheromone_grid_hive[ant.y, ant.x] += 1/ant.COUNTER
+        if running:
+            for ant in ants:
+                if food_grid[ant.y, ant.x] == 1:
+                    ant.seek_hive()
+                    ant.COUNTER = 1
+                if hive_grid[ant.y, ant.x] == 1:
+                    ant.seek_food()
+                    ant.COUNTER = 1
+                if ant.state == Ant.TO_HIVE:
+                    pheromone_grid_food[ant.y, ant.x] += 1/ant.COUNTER
+                else:
+                    pheromone_grid_hive[ant.y, ant.x] += 1/ant.COUNTER
 
-            ant.move(obstacle_grid, pheromone_grid_food, pheromone_grid_hive)
+                ant.move(obstacle_grid, pheromone_grid_food, pheromone_grid_hive)
 
                 # ant.COUNTER += 1
 
-        draw_scene(screen, grid_rect, block_size, ants, obstacle_grid, pheromone_grid_food, pheromone_grid_hive,
-                   food_grid, hive_grid)
+            print(pheromone_grid_hive.max())
+            draw_scene(screen, grid_rect, block_size, ants, obstacle_grid, pheromone_grid_food, pheromone_grid_hive,
+                       food_grid, hive_grid)
 
-        pheromone_grid_food *= 0.98
-        pheromone_grid_food[pheromone_grid_food < 0.01] = 0
+            pheromone_grid_food *= 0.98
+            pheromone_grid_food[pheromone_grid_food < 0.01] = 0
 
-        pheromone_grid_hive *= 0.98
-        pheromone_grid_hive[pheromone_grid_hive < 0.01] = 0
-        # pheromone_grid = pheromone_grid.clip(0, None)
+            pheromone_grid_hive *= 0.98
+            pheromone_grid_hive[pheromone_grid_hive < 0.01] = 0
+            # pheromone_grid = pheromone_grid.clip(0, None)
 
         CLOCK.tick(FPS)
         pg.display.flip()
