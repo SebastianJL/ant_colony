@@ -13,7 +13,7 @@ pygame_icon = pg.image.load("ant.png")
 pg.display.set_icon(pygame_icon)
 CLOCK = pg.time.Clock()
 FONT = pg.font.SysFont("Arial", 16)
-FPS = 10
+FPS = 30
 RED, GREEN, BLUE = (255, 0, 0), (0, 255, 0), (0, 0, 255)
 WHITE, BLACK = (255, 255, 255), (0, 0, 0)
 YELLOW, PURPLE = (255, 255, 0), (255, 0, 255)
@@ -93,7 +93,7 @@ def main():
 
             ant.move(obstacle_grid, pheromone_grid_food, pheromone_grid_hive)
 
-            ant.COUNTER += 1
+                # ant.COUNTER += 1
 
         draw_scene(screen, grid_rect, block_size, ants, obstacle_grid, pheromone_grid_food, pheromone_grid_hive,
                    food_grid, hive_grid)
@@ -196,7 +196,7 @@ class Ant:
             possible_directions[directions.Down] = 0
 
         # Prefer current direction.
-        possible_directions[self.direction] *= 3
+        possible_directions[self.direction] *= 10
         possible_directions[(self.direction + 1) % 4] *= 1
         possible_directions[(self.direction - 1) % 4] *= 1
         possible_directions[(self.direction + 2) % 4] *= 0.1
